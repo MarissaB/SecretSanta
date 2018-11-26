@@ -1,21 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace SecretSanta
@@ -28,8 +17,6 @@ namespace SecretSanta
         public MainWindow()
         {
             InitializeComponent();
-            //santas.Add(MakeTestSantaList());
-            //ManualReviewDataGrid.ItemsSource = santas;
         }
 
         public List<Santa> santas = new List<Santa>();
@@ -37,17 +24,9 @@ namespace SecretSanta
             public List<Santa> manualReviewSantas = new List<Santa>();
             public List<Santa> tooYoungSantas = new List<Santa>();
             public List<Santa> caughtGrinches = new List<Santa>();
+            public List<Santa> internationalSantas = new List<Santa>();
 
         public List<Grinch> grinches = new List<Grinch>();
-
-        public Santa MakeTestSantaList()
-        {
-            Santa santa = new Santa
-            {
-                RedditUsername = "test user"
-            };
-            return santa;
-        }
 
         #region Santa Stuff
         private void ImportRawFileButton_Click(object sender, RoutedEventArgs e)
@@ -85,7 +64,7 @@ namespace SecretSanta
         {
             // We change file extension here to make sure it's a .tsv file.
             string[] lines = File.ReadAllLines(System.IO.Path.ChangeExtension(fileName, ".tsv"));
-            
+
 
             // lines.Select allows me to project each line as a Santa. 
             // This will give me an IEnumerable<Santa> back.
@@ -139,7 +118,7 @@ namespace SecretSanta
                 // Open document 
                 string filename = dlg.FileName;
                 try
-                { 
+                {
                     IEnumerable<Grinch> enumerableGrinches = ReadGrinches(filename);
                     ParseTheGrinchData(enumerableGrinches);
                     GrinchFileLinesLabel.Content = enumerableGrinches.Count();
@@ -155,7 +134,7 @@ namespace SecretSanta
         {
             // We change file extension here to make sure it's a .tsv file.
             string[] lines = File.ReadAllLines(System.IO.Path.ChangeExtension(fileName, ".tsv"));
-            
+
 
             // lines.Select allows me to project each line as a Grinch. 
             // This will give me an IEnumerable<Grinch> back.
@@ -187,11 +166,11 @@ namespace SecretSanta
             grinches.RemoveAll(x => removeTheseGrinches.Contains(x));
         }
         #endregion
-        
+
         #region Parsing Stuff
         private void ParseAccounts_Click(object sender, RoutedEventArgs e)
         {
-            
+
             if (santas.Count == 0 || grinches.Count == 0)
             {
                 MessageBox.Show("Santas and Grinches files are not imported.", "ERROR: MISSING FILES", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -207,6 +186,9 @@ namespace SecretSanta
                 BootedAccountsText.Text = "The following Santas were booted and are not valid for matching.\r\n\r\n";
                 BootedAccountsText.Text += LogParsing(tooYoungSantas) + "\r\n";
                 BootedAccountsText.Text += LogParsing(caughtGrinches);
+                BootedDataGrid.ItemsSource = tooYoungSantas.Concat(caughtGrinches);
+
+                ValidSantaDataGrid.ItemsSource = validSantas;
             }
             LoadingLabel.Visibility = Visibility.Collapsed;
 
@@ -247,7 +229,7 @@ namespace SecretSanta
 
             foreach (Santa user in santas)
             {
-                
+
                 user.GetAccountCreationDate();
                 user.ValidateSanta();
 
@@ -302,7 +284,7 @@ namespace SecretSanta
                 }
             }
             return log;
-            
+
         }
 
         #endregion
@@ -311,14 +293,20 @@ namespace SecretSanta
 
         private void AddManuals_Click(object sender, RoutedEventArgs e)
         {
+            List<Santa> santasToRemove = new List<Santa>();
             foreach (Santa row in ManualReviewDataGrid.ItemsSource)
             {
                 if (row.NeedsManualReview == false)
                 {
-                    manualReviewSantas.Remove(row);
+                    santasToRemove.Add(row);
                     row.ProblemFields.Clear();
                     validSantas.Add(row);
                 }
+            }
+
+            foreach (Santa remove in santasToRemove)
+            {
+                manualReviewSantas.Remove(remove);
             }
 
             ManualReviewDataGrid.ItemsSource = null;
@@ -338,5 +326,111 @@ namespace SecretSanta
 
         #endregion
 
+        #region Sorting and Pairing Valid Santas
+
+        private void PairSantas_Click(object sender, RoutedEventArgs e)
+        {
+            List<List<Santa>> separatedByCountry = BreakDownSantaList(validSantas);
+
+            foreach (List<Santa> countryList in separatedByCountry)
+            {
+                List<Tuple<Santa, Santa>> pairedSantas = PairSantas(countryList);
+            }
+
+            if (internationalSantas.Count > 0)
+            {
+                ManualPairButton.IsEnabled = true;
+                ManualPairGridUpper.ItemsSource = internationalSantas;
+                ManualPairGridLower.ItemsSource = internationalSantas;
+            }
+        }
+
+        public List<List<Santa>> BreakDownSantaList(List<Santa> unfilteredList)
+        {
+            List<List<Santa>> brokenDownList = new List<List<Santa>>();
+
+            List<string> countries = unfilteredList.Select(o => o.Country).Distinct().ToList();
+            foreach (string country in countries)
+            {
+                List<Santa> countryOfSantas = unfilteredList.Where(c => c.Country == country).ToList();
+
+                if (countryOfSantas.Count % 2 != 0) // Number of santas in this batch is odd! Grab an international santa
+                {
+                    Santa specialPick = new Santa();
+                    try // to get an overseas international santa
+                    {
+                        specialPick = countryOfSantas.Where(s => s.ShipOverseas == true).First();
+                    }
+                    catch // international shipping alone is okay too if there are no overseas shipper santas
+                    {
+                        specialPick = countryOfSantas.Where(s => s.ShipInternationally == true).FirstOrDefault();
+                    }
+                    internationalSantas.Add(specialPick);
+                    countryOfSantas.Remove(specialPick);
+                }
+
+                if (countryOfSantas.Count > 0) // Because if there's only one they're in the international pool already
+                {
+                    brokenDownList.Add(countryOfSantas);
+                }
+            }
+
+            return brokenDownList;
+        }
+
+        public List<Tuple<Santa, Santa>> PairSantas(List<Santa> inputList)
+        {
+            List<Tuple<Santa, Santa>> pairedSantas = new List<Tuple<Santa, Santa>>();
+            List<Santa> recipientSantas = new List<Santa>(inputList); // santas we pull from - this will go down to empty
+
+            foreach (Santa santa in inputList)
+            {
+                Santa recipient = GetRandomSanta(santa, recipientSantas);
+                Tuple<Santa, Santa> pair = new Tuple<Santa, Santa>(santa, recipient);
+                pairedSantas.Add(pair);
+                recipientSantas.Remove(recipient);
+            }
+
+            return pairedSantas;
+        }
+
+        public Santa GetRandomSanta(Santa giver, List<Santa> recipients)
+        {
+            Random random = new Random();
+            int randomNumber;
+            Santa pick = new Santa();
+
+            do
+            {
+                if (recipients.Count != 2)
+                {
+                    randomNumber = random.Next(0, recipients.Count - 1);
+                    pick = recipients[randomNumber];
+                }
+                else
+                {
+                    pick = recipients[1]; // When there are only 2 left, pair 'em up directly to avoid loop issues
+                }
+            }
+            while (pick.RedditUsername == giver.RedditUsername);
+
+            return pick;
+
+        }
+
+        #endregion
+
+        #region Manual Pairs (UN of Santas)
+        /*TODO: Use two lists to pair santas manually.
+         * Username validation to avoid pairing to themselves.
+         * Add pairs under a manual bunch.
+         */
+
+        private void PairManualSantas_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        #endregion
     }
 }

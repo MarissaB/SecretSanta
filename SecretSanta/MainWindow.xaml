@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SecretSanta"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1000" Width="1000">
+        Title="MainWindow" Height="550" Width="1000">
    
     <Grid>
         <Button Name="ImportRawFileButton" Content="Import Entries File" HorizontalAlignment="Left" Margin="74,52,0,0" VerticalAlignment="Top" Width="150" Click="ImportRawFileButton_Click"/>
@@ -40,10 +40,10 @@
                         <TextBox Name="ManualReviewText" IsReadOnly="True" Grid.Column="0" TextWrapping="Wrap" Height="350"/>
                         <Button Name="ManuallyAddSantas" IsEnabled="False" HorizontalAlignment="Center" Width="150" Height="25" Margin="10" Content="Add Reviewed Santas" Click="AddManuals_Click"/>
                     </StackPanel>
-                    <DataGrid Name="ManualReviewDataGrid" Grid.Column="1" AutoGenerateColumns="False">
+                    <DataGrid Name="ManualReviewDataGrid" Grid.Column="1" AutoGenerateColumns="False" >
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
-                            <DataGridCheckBoxColumn Header="Invalid?" Binding="{Binding Path=NeedsManualReview}"/>
+                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername, NotifyOnTargetUpdated=True}" IsReadOnly="True"/>
+                            <DataGridCheckBoxColumn Header="Invalid?" Binding="{Binding Path=NeedsManualReview, NotifyOnTargetUpdated=True}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -63,8 +63,35 @@
                     <DataGrid Name="ValidSantaDataGrid"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="Manual Pairs">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="2*"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="1" Content="Select Santas from above and below to make a manual pair. Click the button to confirm the pair."/>
+                    <Button x:Name="ManualPairButton" Grid.Row="1" Content="🡅 Confirm Manual Pair 🡇" Height="25" IsEnabled="False"/>
+                    <DataGrid Name="ManualPairGridUpper" Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True" SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
+                            <DataGridTextColumn Header="Country" Binding="{Binding Path=Country}"/>
+                            <DataGridCheckBoxColumn Header="Ship International" Binding="{Binding Path=ShipInternationally}"/>
+                            <DataGridCheckBoxColumn Header="Ship Overseas" Binding="{Binding Path=ShipOverseas}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DataGrid Name="ManualPairGridLower" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
+                            <DataGridTextColumn Header="Country" Binding="{Binding Path=Country}"/>
+                            <DataGridCheckBoxColumn Header="Ship International" Binding="{Binding Path=ShipInternationally}"/>
+                            <DataGridCheckBoxColumn Header="Ship Overseas" Binding="{Binding Path=ShipOverseas}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
         </TabControl>
-        <Button Name="CreateMatches" Content="Pair Valid Santas!" HorizontalAlignment="Left" Margin="74,387,0,0" VerticalAlignment="Top" Width="150" Click="ParseAccounts_Click"/>
+        <Button Name="CreateMatches" Content="Pair Valid Santas!" HorizontalAlignment="Left" Margin="74,387,0,0" VerticalAlignment="Top" Width="150" Click="PairSantas_Click"/>
         <Label x:Name="LoadingLabel" Content="Loading..." HorizontalAlignment="Left" Margin="229,240,0,0" VerticalAlignment="Top" Width="73" Visibility="Collapsed"/>
     </Grid>
 </Window>

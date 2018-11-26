@@ -25,6 +25,7 @@ namespace SecretSanta
         public DateTime CreationDate { get; set; }
         public bool NeedsManualReview { get; set; }
         public List<string> ProblemFields { get; set; }
+        public string OutputString { get; set; }
 
         public Santa() { }
 
@@ -36,12 +37,20 @@ namespace SecretSanta
             RedditUsername = SanitizeUsername(username).Trim();
             Wishlist = wishlist;
             Rematcher = CastStringToBool(rematcher);
-            ShipInternationally = CastStringToBool(international);
             ShipOverseas = CastStringToBool(overseas);
+            if (ShipOverseas)
+            {
+                ShipInternationally = true; // Clearly if you can ship overseas, you're shipping internationally already...
+            }
+            else
+            {
+                ShipInternationally = CastStringToBool(international); // ...but you could be land-locked if you're not cool with overseas.
+            }
             Country = country.ToUpper().Trim();
             Address = address.ToUpper().Trim();
             NeedsManualReview = false;
             ProblemFields = new List<string>();
+            OutputString = Stringify();
         }
 
         public string SanitizeUsername(string user)
@@ -172,5 +181,23 @@ namespace SecretSanta
             }
         }
 
+        /* Goal columns (starting on row 3)
+        * First Name
+        * Last Name
+        * Email
+        * Username
+        * What they want
+        * Country
+        * Address */
+
+        public string Stringify()
+        {
+            string text = string.Empty;
+
+            text = FirstName + "\t" + LastName + "\t" + EmailAddress + "\t" +
+                RedditUsername + "\t" + Wishlist + "\t" + Country + "\t" + Address + "\t";
+
+            return text;
+        }
     }
 }
