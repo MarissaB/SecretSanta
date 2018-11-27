@@ -353,8 +353,7 @@ namespace SecretSanta
             {
                 // Save document
                 saveFileName = saveDialog.FileName;
-                string bumperLine = "\r\n\r\n";
-                File.AppendAllText(saveFileName, bumperLine);
+                File.WriteAllText(saveFileName, string.Empty); // If there's already a file, empty it for overwriting
 
                 List<List<Santa>> separatedByCountry = BreakDownSantaList(validSantas);
 
