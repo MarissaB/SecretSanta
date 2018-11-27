@@ -29,8 +29,8 @@
         <Label Name="GrinchFileLinesLabel" Content="###" HorizontalAlignment="Left" Margin="192,176,0,0" VerticalAlignment="Top"/>
         <Label Content="How many Grinches were found?" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top"/>
         <Label Name="HowManyGrinchesParsedLabel" Content="###" HorizontalAlignment="Left" Margin="192,202,0,0" VerticalAlignment="Top"/>
-        <TabControl HorizontalAlignment="Left" Height="427" Margin="307,52,0,0" VerticalAlignment="Top" Width="678">
-            <TabItem Header="Manual Reviews">
+        <TabControl HorizontalAlignment="Left" Height="427" Margin="307,52,0,0" VerticalAlignment="Top" Width="678" Name="TabController">
+            <TabItem Header="Manual Reviews" IsEnabled="False" Name="ManualReviewTab">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*"/>
@@ -40,7 +40,7 @@
                         <TextBox Name="ManualReviewText" IsReadOnly="True" Grid.Column="0" TextWrapping="Wrap" Height="350"/>
                         <Button Name="ManuallyAddSantas" IsEnabled="False" HorizontalAlignment="Center" Width="150" Height="25" Margin="10" Content="Add Reviewed Santas" Click="AddManuals_Click"/>
                     </StackPanel>
-                    <DataGrid Name="ManualReviewDataGrid" Grid.Column="1" AutoGenerateColumns="False" >
+                    <DataGrid Name="ManualReviewDataGrid" Grid.Column="1" AutoGenerateColumns="False" IsEnabled="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername, NotifyOnTargetUpdated=True}" IsReadOnly="True"/>
                             <DataGridCheckBoxColumn Header="Invalid?" Binding="{Binding Path=NeedsManualReview, NotifyOnTargetUpdated=True}"/>
@@ -48,7 +48,7 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Booted Accounts">
+            <TabItem Header="Booted Accounts" IsEnabled="False" Name="BootedTab">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -58,20 +58,23 @@
                     <DataGrid Name="BootedDataGrid" Grid.Column="1"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Valid Santas">
+            <TabItem Header="Valid Santas" IsEnabled="False" Name="ValidTab">
                 <Grid Background="#FFE5E5E5">
                     <DataGrid Name="ValidSantaDataGrid"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Manual Pairs">
+            <TabItem Header="Manual Pairs" IsEnabled="False" Name="ManualPairTab">
                 <Grid Background="#FFE5E5E5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="2*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="2*"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="1" Content="Select Santas from above and below to make a manual pair. Click the button to confirm the pair."/>
-                    <Button x:Name="ManualPairButton" Grid.Row="1" Content="🡅 Confirm Manual Pair 🡇" Height="25" IsEnabled="False"/>
+                    <StackPanel Orientation="Vertical" Grid.Row="1">
+                        <Label Content="Select Santas from above and below to make a manual pair. Click the button to confirm the pair."/>
+                        <Button x:Name="ManualPairButton" Content="🡅 Confirm Manual Pair 🡇" Height="25" IsEnabled="False" Click="PairManualSantas_Click"/>
+                        <Label Content="Don't pair up odd numbers to leave someone paired to themselves :("/>
+                    </StackPanel>
                     <DataGrid Name="ManualPairGridUpper" Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True" SelectionUnit="FullRow">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
@@ -91,7 +94,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button Name="CreateMatches" Content="Pair Valid Santas!" HorizontalAlignment="Left" Margin="74,387,0,0" VerticalAlignment="Top" Width="150" Click="PairSantas_Click"/>
+        <Button Name="CreateMatches" Content="Pair / Export Valid Santas!" HorizontalAlignment="Left" Margin="74,387,0,0" VerticalAlignment="Top" Width="150" Click="PairSantas_Click" IsEnabled="False"/>
         <Label x:Name="LoadingLabel" Content="Loading..." HorizontalAlignment="Left" Margin="229,240,0,0" VerticalAlignment="Top" Width="73" Visibility="Collapsed"/>
     </Grid>
 </Window>

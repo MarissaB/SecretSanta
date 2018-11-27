@@ -29,6 +29,11 @@ namespace SecretSanta
 
         public Santa() { }
 
+        public Santa (string firstName) // used only for special vendor pairs on singles
+        {
+            FirstName = firstName;
+        }
+
         public Santa(string firstName, string lastName, string email, string username, string wishlist, string rematcher, string international, string overseas, string country, string address)
         {
             FirstName = firstName.ToUpper().Trim();
@@ -195,7 +200,7 @@ namespace SecretSanta
             string text = string.Empty;
 
             text = FirstName + "\t" + LastName + "\t" + EmailAddress + "\t" +
-                RedditUsername + "\t" + Wishlist + "\t" + Country + "\t" + Address + "\t";
+                RedditUsername + "\t" + Wishlist + "\t" + Country + "\t" + Address;
 
             return text;
         }

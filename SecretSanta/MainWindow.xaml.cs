@@ -24,9 +24,11 @@ namespace SecretSanta
             public List<Santa> manualReviewSantas = new List<Santa>();
             public List<Santa> tooYoungSantas = new List<Santa>();
             public List<Santa> caughtGrinches = new List<Santa>();
-            public List<Santa> internationalSantas = new List<Santa>();
+            public List<Santa> internationalGivers = new List<Santa>();
+            public List<Santa> internationalRecipients = new List<Santa>();
 
         public List<Grinch> grinches = new List<Grinch>();
+        public string saveFileName = string.Empty;
 
         #region Santa Stuff
         private void ImportRawFileButton_Click(object sender, RoutedEventArgs e)
@@ -189,17 +191,24 @@ namespace SecretSanta
                 BootedDataGrid.ItemsSource = tooYoungSantas.Concat(caughtGrinches);
 
                 ValidSantaDataGrid.ItemsSource = validSantas;
+                CreateMatches.IsEnabled = true;
             }
             LoadingLabel.Visibility = Visibility.Collapsed;
 
             if (manualReviewSantas.Count > 0)
             {
                 ManuallyAddSantas.IsEnabled = true;
+                ManualReviewTab.IsEnabled = true;
+                ManualReviewDataGrid.IsEnabled = true;
+                TabController.SelectedIndex = 0;
             }
             else
             {
-                ManuallyAddSantas.IsEnabled = false;
+                TabController.SelectedIndex = 1;
             }
+
+            BootedTab.IsEnabled = true;
+            ValidTab.IsEnabled = true;
         }
 
         public void DoEvents()
@@ -217,7 +226,6 @@ namespace SecretSanta
             );
             Dispatcher.PushFrame(frame);
         }
-
 
         public async void ParseTheData()
         {
@@ -330,18 +338,52 @@ namespace SecretSanta
 
         private void PairSantas_Click(object sender, RoutedEventArgs e)
         {
-            List<List<Santa>> separatedByCountry = BreakDownSantaList(validSantas);
-
-            foreach (List<Santa> countryList in separatedByCountry)
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog
             {
-                List<Tuple<Santa, Santa>> pairedSantas = PairSantas(countryList);
-            }
+                FileName = "Exported Santas for " + DateTime.Today.Year.ToString(), // Default file name
+                DefaultExt = ".tsv", // Default file extension
+                Filter = "Tab separated file (.tsv)|*.tsv" // Filter files by extension
+            };
 
-            if (internationalSantas.Count > 0)
+            // Show save file dialog box
+            bool? result = saveDialog.ShowDialog();
+
+            // Process save file dialog box results
+            if (result == true)
             {
-                ManualPairButton.IsEnabled = true;
-                ManualPairGridUpper.ItemsSource = internationalSantas;
-                ManualPairGridLower.ItemsSource = internationalSantas;
+                // Save document
+                saveFileName = saveDialog.FileName;
+                string bumperLine = "\r\n\r\n";
+                File.AppendAllText(saveFileName, bumperLine);
+
+                List<List<Santa>> separatedByCountry = BreakDownSantaList(validSantas);
+
+                foreach (List<Santa> countryList in separatedByCountry)
+                {
+                    List<Tuple<Santa, Santa>> pairedSantas = PairSantas(countryList);
+                    foreach (Tuple<Santa, Santa> santaPairing in pairedSantas)
+                    {
+                        string exportLine = ExportSantas(santaPairing);
+                        File.AppendAllText(saveFileName, exportLine);
+                    }
+                }
+
+                if (internationalGivers.Count > 0)
+                {
+                    if (internationalGivers.Count == 1)
+                    {
+                        string magic = "Remote santa! Make some magic.";
+                        Santa bigRedGuy = new Santa(magic);
+                        internationalGivers.Add(bigRedGuy);
+                        internationalRecipients.Add(bigRedGuy);
+                    }
+                    ManualPairTab.IsEnabled = true;
+                    ManualPairButton.IsEnabled = true;
+                    ManualPairGridUpper.ItemsSource = internationalGivers;
+                    ManualPairGridLower.ItemsSource = internationalRecipients;
+                    TabController.SelectedIndex = 3;
+                }
+                CreateMatches.IsEnabled = false;
             }
         }
 
@@ -354,7 +396,7 @@ namespace SecretSanta
             {
                 List<Santa> countryOfSantas = unfilteredList.Where(c => c.Country == country).ToList();
 
-                if (countryOfSantas.Count % 2 != 0) // Number of santas in this batch is odd! Grab an international santa
+                if (countryOfSantas.Count % 2 != 0 || countryOfSantas.Count == 1) // Number of santas in this batch is odd! Grab an international santa
                 {
                     Santa specialPick = new Santa();
                     try // to get an overseas international santa
@@ -363,9 +405,17 @@ namespace SecretSanta
                     }
                     catch // international shipping alone is okay too if there are no overseas shipper santas
                     {
-                        specialPick = countryOfSantas.Where(s => s.ShipInternationally == true).FirstOrDefault();
+                        try
+                        {
+                            specialPick = countryOfSantas.Where(s => s.ShipInternationally == true).First();
+                        }
+                        catch
+                        {
+                            specialPick = countryOfSantas.FirstOrDefault();
+                        }
                     }
-                    internationalSantas.Add(specialPick);
+                    internationalGivers.Add(specialPick);
+                    internationalRecipients.Add(specialPick);
                     countryOfSantas.Remove(specialPick);
                 }
 
@@ -421,16 +471,61 @@ namespace SecretSanta
         #endregion
 
         #region Manual Pairs (UN of Santas)
-        /*TODO: Use two lists to pair santas manually.
-         * Username validation to avoid pairing to themselves.
-         * Add pairs under a manual bunch.
-         */
-
         private void PairManualSantas_Click(object sender, RoutedEventArgs e)
         {
-            
+            if (ManualPairGridUpper.SelectedIndex == -1 || 
+                ManualPairGridLower.SelectedIndex == -1 || 
+                CheckValidPair((Santa)ManualPairGridUpper.SelectedItem, (Santa)ManualPairGridLower.SelectedItem) == false ||
+                saveFileName == string.Empty)
+            {
+                MessageBox.Show("Must select different Santas from top and bottom to make a pair.", "ERROR: NO SELECTION", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+            {
+                Santa giver = (Santa)ManualPairGridUpper.SelectedItem;
+                Santa recipient = (Santa)ManualPairGridLower.SelectedItem;
+                Tuple<Santa, Santa> santaPairing = new Tuple<Santa, Santa>(giver, recipient);
+
+                string exportLine = ExportSantas(santaPairing);
+                File.AppendAllText(saveFileName, exportLine);
+
+                RemoveManuals(giver, recipient);
+            }
         }
 
+        public bool CheckValidPair(Santa santa1, Santa santa2)
+        {
+            bool isValidPair = false;
+
+            if (santa1.RedditUsername != santa2.RedditUsername)
+            {
+                isValidPair = true;
+            }
+
+            return isValidPair;
+        }
         #endregion
+
+        public string ExportSantas(Tuple<Santa, Santa> santaPair)
+        {
+            string exportLine = string.Empty;
+
+            exportLine = santaPair.Item1.OutputString + "\t" + santaPair.Item2.OutputString + "\r\n";
+
+            return exportLine;
+        }
+
+        private void RemoveManuals(Santa giver, Santa recipient)
+        {
+            internationalGivers.Remove(giver);
+            internationalRecipients.Remove(recipient);
+
+            ManualPairGridUpper.ItemsSource = null;
+            ManualPairGridUpper.ItemsSource = internationalGivers;
+
+            ManualPairGridLower.ItemsSource = null;
+            ManualPairGridLower.ItemsSource = internationalRecipients;
+        }
+
     }
 }
