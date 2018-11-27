@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SecretSanta"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="1000">
+        Title="Secret Santa Parser" Height="550" Width="1000">
    
     <Grid>
         <Button Name="ImportRawFileButton" Content="Import Entries File" HorizontalAlignment="Left" Margin="74,52,0,0" VerticalAlignment="Top" Width="150" Click="ImportRawFileButton_Click"/>
@@ -76,16 +76,24 @@
                         <Label Content="Don't pair up odd numbers to leave someone paired to themselves :("/>
                     </StackPanel>
                     <DataGrid Name="ManualPairGridUpper" Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True" SelectionUnit="FullRow">
+                        <DataGrid.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DarkSeaGreen"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="DarkSeaGreen"/>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
+                            <DataGridTextColumn Header="Giver Username" Binding="{Binding Path=RedditUsername}"/>
                             <DataGridTextColumn Header="Country" Binding="{Binding Path=Country}"/>
                             <DataGridCheckBoxColumn Header="Ship International" Binding="{Binding Path=ShipInternationally}"/>
                             <DataGridCheckBoxColumn Header="Ship Overseas" Binding="{Binding Path=ShipOverseas}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <DataGrid Name="ManualPairGridLower" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" SelectionUnit="FullRow">
+                        <DataGrid.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightCoral"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="LightCoral"/>
+                        </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Username" Binding="{Binding Path=RedditUsername}"/>
+                            <DataGridTextColumn Header="Recipient Username" Binding="{Binding Path=RedditUsername}"/>
                             <DataGridTextColumn Header="Country" Binding="{Binding Path=Country}"/>
                             <DataGridCheckBoxColumn Header="Ship International" Binding="{Binding Path=ShipInternationally}"/>
                             <DataGridCheckBoxColumn Header="Ship Overseas" Binding="{Binding Path=ShipOverseas}"/>

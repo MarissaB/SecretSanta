@@ -354,6 +354,8 @@ namespace SecretSanta
                 // Save document
                 saveFileName = saveDialog.FileName;
                 File.WriteAllText(saveFileName, string.Empty); // If there's already a file, empty it for overwriting
+                internationalGivers.Clear();
+                internationalRecipients.Clear();
 
                 List<List<Santa>> separatedByCountry = BreakDownSantaList(validSantas);
 
@@ -382,7 +384,6 @@ namespace SecretSanta
                     ManualPairGridLower.ItemsSource = internationalRecipients;
                     TabController.SelectedIndex = 3;
                 }
-                CreateMatches.IsEnabled = false;
             }
         }
 
