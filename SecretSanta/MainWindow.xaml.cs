@@ -236,7 +236,7 @@ namespace SecretSanta
 
         public async void ParseTheData()
         {
-            santas.Select(o => o.RedditUsername).Distinct();
+            santas = santas.GroupBy(r => r.RedditUsername).Select(s => s.First()).ToList();
             int validCount = 0;
             int badDate = 0;
             int manualReviewCount = 0;
