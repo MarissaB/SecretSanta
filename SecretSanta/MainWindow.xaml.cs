@@ -236,7 +236,6 @@ namespace SecretSanta
 
         public async void ParseTheData()
         {
-            santas = santas.GroupBy(r => r.RedditUsername).Select(s => s.First()).ToList();
             int validCount = 0;
             int badDate = 0;
             int manualReviewCount = 0;
@@ -244,6 +243,12 @@ namespace SecretSanta
 
             foreach (Santa user in santas)
             {
+                int usernameCount = santas.Where(s => s.RedditUsername == user.RedditUsername).Count();
+                if (usernameCount != 1)
+                {
+                    MessageBox.Show("Duplicate Username: " + user.RedditUsername + "x " + usernameCount, "DUPLICATE FOUND", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+                }
                 try
                 {
                     user.GetAccountCreationDate();

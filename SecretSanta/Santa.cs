@@ -179,6 +179,11 @@ namespace SecretSanta
                 ProblemFields.Add("Invalid email.");
             }
 
+            if (EmailAddress.Contains("..")) // fix stupid email typos
+            {
+                EmailAddress = EmailAddress.Replace("..", ".");
+            }
+
             if(Country.Length == 0 || Address.Length == 0)
             {
                 NeedsManualReview = true;
