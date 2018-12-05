@@ -1,6 +1,6 @@
 Happy holidays! I created this little application to make pairing in bulk a lot faster for our subreddit's Secret Santa event.
 
-To use: Run the EXE build.
+To use: Extract the App.zip folder and run the EXE within it.
 
 1. Import the file of users.
 --- Must be tab-delimited (TSV).
