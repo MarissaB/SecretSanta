@@ -182,6 +182,20 @@ namespace SecretSanta
                 try
                 {
                     ParseTheData();
+                    if (manualReviewSantas.Count > 0)
+                    {
+                        ManuallyAddSantas.IsEnabled = true;
+                        ManualReviewTab.IsEnabled = true;
+                        ManualReviewDataGrid.IsEnabled = true;
+                        TabController.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        TabController.SelectedIndex = 1;
+                    }
+
+                    BootedTab.IsEnabled = true;
+                    ValidTab.IsEnabled = true;
                 }
                 catch (Exception ex)
                 {
@@ -202,21 +216,6 @@ namespace SecretSanta
                 CreateMatches.IsEnabled = true;
             }
             LoadingLabel.Visibility = Visibility.Collapsed;
-
-            if (manualReviewSantas.Count > 0)
-            {
-                ManuallyAddSantas.IsEnabled = true;
-                ManualReviewTab.IsEnabled = true;
-                ManualReviewDataGrid.IsEnabled = true;
-                TabController.SelectedIndex = 0;
-            }
-            else
-            {
-                TabController.SelectedIndex = 1;
-            }
-
-            BootedTab.IsEnabled = true;
-            ValidTab.IsEnabled = true;
         }
 
         public void DoEvents()
