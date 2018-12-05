@@ -88,32 +88,18 @@ namespace SecretSanta
             string accountOverviewURL = BuildAccountURL(RedditUsername);
             string timeHTML = string.Empty;
 
-            try
-            {
-                //get the page
-                var web = new HtmlWeb();
-                var document = web.Load(accountOverviewURL);
-                var page = document.DocumentNode;
+            //get the page
+            var web = new HtmlWeb();
+            var document = web.Load(accountOverviewURL);
+            var page = document.DocumentNode;
 
-                //loop through all span tags with age css class
-                foreach (var item in page.QuerySelectorAll("span.age"))
-                {
-                    timeHTML = item.QuerySelector("time").OuterHtml;
-                }
-                creationDate = ParseCreationHTML(timeHTML);
-                CreationDate = creationDate;
-            }
-            catch (Exception ex)
+            //loop through all span tags with age css class
+            foreach (var item in page.QuerySelectorAll("span.age"))
             {
-                string source = "SecretSanta App";
-                EventLog systemEventLog = new EventLog("System");
-                if (!EventLog.SourceExists(source))
-                {
-                    EventLog.CreateEventSource(source, "System");
-                }
-                systemEventLog.Source = source;
-                systemEventLog.WriteEntry("Failed in GetAccountCreationDate:\r\nAccountOverviewURL = " + accountOverviewURL + "\r\n" + ex.Message, EventLogEntryType.Error, 150);
+               timeHTML = item.QuerySelector("time").OuterHtml;
             }
+            creationDate = ParseCreationHTML(timeHTML);
+            CreationDate = creationDate;
         }
 
         public string BuildAccountURL(string username)

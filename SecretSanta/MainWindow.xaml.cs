@@ -179,7 +179,15 @@ namespace SecretSanta
             }
             else
             {
-                ParseTheData();
+                try
+                {
+                    ParseTheData();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Failed to parse Santas", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
                 ManualReviewText.Text = "The following Santas need manual review and correction before they can be valid for matching.\r\n\r\n";
                 ManualReviewText.Text += LogParsing(manualReviewSantas);
@@ -237,8 +245,15 @@ namespace SecretSanta
 
             foreach (Santa user in santas)
             {
-
-                user.GetAccountCreationDate();
+                try
+                {
+                    user.GetAccountCreationDate();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error with " + user.RedditUsername + "\r\n" + ex.Message, "Failed to get Santa account", MessageBoxButton.OK, MessageBoxImage.Error);
+                    break;
+                }
                 user.ValidateSanta();
 
                 bool isAGrinch = user.AmIAGrinch(grinches);
