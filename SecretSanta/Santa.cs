@@ -106,7 +106,7 @@ namespace SecretSanta
         {
             string url = string.Empty;
 
-            url = "https://www.reddit.com/user/" + username + "/overview";
+            url = "https://www.old.reddit.com/user/" + username + "/overview";
 
             return url;
         }
