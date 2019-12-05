@@ -90,7 +90,7 @@ namespace SecretSanta
 
             //get the page
             var web = new HtmlWeb();
-            var document = web.Load(accountOverviewURL);
+            HtmlDocument document = web.Load(accountOverviewURL);
             var page = document.DocumentNode;
 
             //loop through all span tags with age css class
@@ -106,7 +106,7 @@ namespace SecretSanta
         {
             string url = string.Empty;
 
-            url = "https://www.old.reddit.com/user/" + username + "/overview";
+            url = "https://old.reddit.com/user/" + username + "/overview";
 
             return url;
         }
