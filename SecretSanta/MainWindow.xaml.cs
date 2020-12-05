@@ -74,7 +74,7 @@ namespace SecretSanta
             {
                 string[] data = line.Split('\t');
                 // We return a santa with the data in order.
-                return new Santa(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10]);
+                return new Santa(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11]);
             });
         }
 

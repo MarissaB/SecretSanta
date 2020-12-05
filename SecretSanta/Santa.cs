@@ -26,6 +26,7 @@ namespace SecretSanta
         public bool NeedsManualReview { get; set; }
         public List<string> ProblemFields { get; set; }
         public string OutputString { get; set; }
+        public string AdditionalInfo { get; set; }
 
         public Santa() { }
 
@@ -34,7 +35,7 @@ namespace SecretSanta
             FirstName = firstName;
         }
 
-        public Santa(string firstName, string lastName, string email, string username, string wishlist, string rematcher, string international, string overseas, string country, string address)
+        public Santa(string firstName, string lastName, string email, string username, string wishlist, string additionalInfo, string rematcher, string international, string overseas, string country, string address)
         {
             FirstName = firstName.ToUpper().Trim();
             LastName = lastName.ToUpper().Trim();
@@ -43,6 +44,7 @@ namespace SecretSanta
             Wishlist = wishlist;
             Rematcher = CastStringToBool(rematcher);
             ShipOverseas = CastStringToBool(overseas);
+            AdditionalInfo = additionalInfo;
             if (ShipOverseas)
             {
                 ShipInternationally = true; // Clearly if you can ship overseas, you're shipping internationally already...
@@ -205,7 +207,7 @@ namespace SecretSanta
             string text = string.Empty;
 
             text = FirstName + "\t" + LastName + "\t" + EmailAddress + "\t" +
-                RedditUsername + "\t" + Wishlist + "\t" + Country + "\t" + Address;
+                RedditUsername + "\t" + Wishlist + " || Additional Info: " + AdditionalInfo + "\t" + Country + "\t" + Address;
 
             return text;
         }
