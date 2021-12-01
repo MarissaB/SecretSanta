@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -51,36 +52,48 @@ namespace SecretSanta
                 string filename = dlg.FileName;
                 try
                 {
-                    IEnumerable<Santa> enumerableSantas = ReadSantas(filename);
+                    List<Santa> enumerableSantas = ReadSantas(filename);
+                    int count = enumerableSantas.Count();
                     ParseTheSantaData(enumerableSantas);
                     RawFileLinesLabel.Content = enumerableSantas.Count();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine("Failed to import: " + ex);
                     MessageBox.Show("Failed to import Santas file.", "ERROR: INVALID FILE PARSE", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        public IEnumerable<Santa> ReadSantas(string fileName)
+        public List<Santa> ReadSantas(string fileName)
         {
             // We change file extension here to make sure it's a .tsv file.
             string[] lines = File.ReadAllLines(System.IO.Path.ChangeExtension(fileName, ".tsv"));
-
+            List<Santa> readSantas = new List<Santa>();
 
             // lines.Select allows me to project each line as a Santa. 
             // This will give me an IEnumerable<Santa> back.
-            return lines.Select(line =>
+            int santaCount = 0;
+            foreach (string line in lines)
             {
-                string[] data = line.Split('\t');
-                // We return a santa with the data in order.
-                return new Santa(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11]);
-            });
+                try
+                {
+                    string[] data = line.Split('\t');
+                    Santa newSanta = new Santa(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11]);
+                    readSantas.Add(newSanta);
+                    santaCount++;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Failed santa @ " + santaCount + " || " + ex);
+                }
+            }
+            return readSantas;
         }
 
-        public void ParseTheSantaData(IEnumerable<Santa> rawSantaImport)
+        public void ParseTheSantaData(List<Santa> rawSantaImport)
         {
-            santas = rawSantaImport.ToList();
+            santas = rawSantaImport;
             List<Santa> removeTheseSantas = new List<Santa>();
             int counter = 0;
             foreach (Santa user in santas)
